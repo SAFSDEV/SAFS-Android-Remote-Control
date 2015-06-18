@@ -1,0 +1,428 @@
+<html>
+<head><title>Robotium Remote Control Release Notes</title></head>
+<body>
+<a name="top" />
+<h1><center>
+Robotium Remote Control Release Notes<br/>
+2013.06.28<br></center></h1>
+<p>
+<a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Test Development</a>,&#032;
+<a href="#newstuff">What's New</a>&#032;
+<hr/><! ======================================================================>
+<a name="definitions" />
+<p>
+<h3><b>Definitions:</b><br/></h3>
+<table border=0 cellspacing=7 >
+<tr><td><b>
+SAFS</b><td><b><a href="http://safsdev.sourceforge.net" target=_blank alt="SAFSDEV Home Page" >
+Software Automation Framework Support</a></b>
+</td>
+<tr><td><b>Device</b><td>The actual Android device to be used for testing.<br>
+An Emulator is also considered a device.
+<tr><td><b>On-Device</b><td>Code or applications on the device targetted for testing.
+<tr><td><b>AUT</b><td>App Under Test--the on-device <b>target APK</b> to be tested.
+<tr><td><b>Messenger</b><td>The on-device <b>SAFS TCP Messenger APK</b> for Android testing.
+<tr><td><b>RobotiumTestRunner</b><td>The on-device <b>RobotiumTestRunner APK</b> for Robotium Remote Control Android testing.
+<tr><td><b>SAFSTestRunner</b><td>The on-device <b>SAFSTestRunner APK</b> for SAFS Robotium Remote Control Android testing with SAFS extensions.
+<tr><td><b>Controller</b><td>The computer used to remotely control the test on the device.<br>
+For simplicity, the test development machine and the Controller are assumed to be the same.
+<tr><td><b>The Test</b><td>The AUT-specific Java test code developed for execution on the remote Controller.
+</table>
+
+<hr/><! ======================================================================>
+<a name="reminders" />
+<small><a href="#definitions">Definitions</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Test Development</a>,&#032;
+<a href="#newstuff">What's New</a>&#032;
+</small>
+<p>
+<h3><b>Critical Reminders:</b><br/></h3>
+<p>
+<ol>
+<li>The <b>Messenger</b> is a general-purpose SAFS TCP Communication service on Android.&nbsp; It allows us to provide remote control capabilities over TCP even for AUTs and TestRunners
+that DO NOT have the required INTERNET permissions necessary for TCP communications.&nbsp; This service is required (and provided) for Robotium Remote Control even for AUTs that might already have INTERNET permissions.
+<p>
+<li>The <b>TestRunner</b>(s) are general-purpose Android InstrumentationTestRunners created specifically for Robotium/Solo Remote Control.&nbsp; (The TestRunner can be either the Robotium TestRunner or the SAFS TestRunner.)&nbsp; Because the actual AUT-specific test code is on the remote Controller and NOT in the TestRunner, the TestRunner may easily be resigned and repackaged for testing any number of AUTs without modifying its internal code.&nbsp; The TestRunner receives its remote command and control data and reports its success, failure, and results data through the Messenger service.
+<p>
+</ol>
+<p>
+
+
+<hr/><! ======================================================================>
+<a name="instructions" />
+<small><a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#setupnotes">Test Development</a>,&#032;
+<a href="#newstuff">What's New</a>&#032;
+</small>
+<p>
+<h3><b>Install Instructions:</b><br/></h3>
+<p>
+Robotium Remote Control development and execution has the same system requirements as those required for developing standard on-device Android tests. &nbsp;That means a Java SDK, the Android SDK, and Ant are still required.
+
+
+<p><ol>
+<li><b>Verify (<a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html" target="_blank" title="Java JDK Home Page">Install if needed</a>) a Java JDK (not a JRE)</b>:<br>
+The Java SDK should be version 1.6 or higher.<br>
+<p>
+<b>*</b> The System environment variable <b>JAVA_HOME</b> should be set to the path to the Java SDK.<br>
+<b>*</b> The System environment variable <b>PATH</b> should contain the path to the Java SDK '<b>bin</b>' subfolder.
+
+
+<p>
+<li><b>Verify (<a href="http://developer.android.com/sdk/index.html" target="_blank" title="Android SDK Home Page">Install if needed</a>) the Android SDK</b>:<br>
+The recommended Android API Level supported should be 15 or higher.<br>
+<p>
+<b>*</b> The System environment variable <b>ANDROID_HOME</b> should be set to the path to the Android SDK.<br>
+<b>*</b> The System environment variable <b>PATH</b> should contain the paths to both the Android SDK's '<b>tools</b>' and '<b>platform-tools</b>' subfolders.
+<p>
+NOTE:
+<ul>To test on an <b>Android Emulator</b>, you must verify/prepare an appropriate 'AVD' with the '<b>android</b>' tool provided with the Android SDK. &nbsp;Refer to the Android Developers documentation for details.
+<p>
+To test on a real device, you must verify/prepare any required connections and/or drivers for your device. &nbsp;Refer to the Android Developers documentation for details.
+</ul>
+
+<p>
+<li><b>Verify (<a href="http://ant.apache.org/" target="_blank" title="Apache Ant Home Page">Install if needed</a>) Apache Ant</b>:<br>
+Ant should be version 1.8 or higher.<br>
+<p>
+<b>*</b> The System environment variable <b>ANT_HOME</b> should be set to the path to the Ant SDK.<br>
+<b>*</b> The System environment variable <b>PATH</b> should contain the path to the Ant SDK's '<b>bin</b>' subfolder.
+<p>
+<li><b>Double-click or otherwise extract the contents of the RobotiumRCRelease ZIP into a directory.</b>: &lt;workdir>
+<p>
+<li><b>In a CMD/Shell/Terminal window navigate to the &lt;workdir> directory and execute the appropriate installation script</b>:
+<p><ul>
+<b><u>Default Installation Directories:</u></b>
+<p>
+<li><b>Win:</b> C:\robotiumrc
+<li><b>Mac:</b> /Library/robotiumrc
+<li><b>Unx:</b> /usr/local/robotiumrc
+<p>
+System environment variable ROBOTIUMRC_HOME can be used to override the default install directory.
+</ul>
+<p><ul><b><u>Running the Install Script:</u></b>
+<pre>
+Windows: Setup-Win.bat %ANDROID_HOME% or &lt;path-to-android-sdk>
+   Unix: Setup-Unx.sh  $ANDROID_HOME  or &lt;path-to-android-sdk>
+    Mac: Setup-Mac.sh  $ANDROID_HOME  or &lt;path-to-android-sdk>
+</pre>
+<p>
+On Mac, and possibly some incantations of Unix, the user may be required to use <b>sudo</b> as follows:
+<p>
+<b>sudo&nbsp;&nbsp;./Setup-Mac.sh&nbsp;&nbsp;$ANDROID_HOME</b><br>
+or<br>
+<b>sudo&nbsp;&nbsp;./Setup-Unx.sh&nbsp;&nbsp;$ANDROID_HOME</b><br>
+<p>
+If the script does not run at all:
+<p><ul>
+<li>make sure the scripts are executable:
+<p>
+<ul>
+chmod a+x *.sh<br>
+</ul>
+<p>
+<li>prefix the shell: '/bin/sh Setup-Mac.sh'<br>
+(Don't forget to use <b>sudo</b>, if necessary.)
+</ul>
+</ul>
+<p>
+<li><b>Rebuild SAFSTCPMessenger-debug.apk</b>:<br>
+Required only once to build with your tester/developer debug profile/certificate.
+<p>
+<ul>
+<li>Go to the <b>SAFSTCPMessenger</b> project and verify/edit the file <b>local.properties</b>:
+<p><ul>
+<b>sdk.dir</b>=&lt;path-to-android-sdk><br>
+<b>safs.droid.automation.libs</b>=&lt;path-to\RobotiumTestRunner\libs>
+<p>
+(Use &lt;path-to\SAFSTestRunner\libs> if you intend to use the SAFSTestRunner instead.<br>
+&nbsp;This line simnply insures the safstcpmessenger.jar is up-to-date for the TestRunner.)
+</ul>
+<p>
+<li>In a CMD/Shell/Terminal window navigate to the <b>SAFSTCPMessenger</b> project directory.
+<li>Enter '<b>ant debug</b>' to build the <b>SAFSTCPMessenger-debug.apk</b>.
+<li>Verify the APK was built in the <b>SAFSTCPMessenger</b> '<b>bin</b>' subfolder.
+    <p>On Windows:<br>
+    If you receive a <b>BUILD FAILED</b> message along with "Could not create task or type of type: componentdef.":
+    <p><ul>
+    There is a CLASSPATH issue which is usually resolved by eliminating the System CLASSPATH in the CMD window with:
+    <p><ul>set CLASSPATH=&nbsp;(leave blank)</ul>
+    <p>
+    Then try the '<b>ant debug</b>' command again in that same CMD window.
+    </ul>
+</ul>
+<p>
+<li><b>Rebuild RobotiumTestRunner-debug.apk</b>:<br>
+Required only once to build with your tester/developer debug profile/certificate.<br>
+<p>
+<ul>
+<li>Go to the <b>RobotiumTestRunner</b> project and verify/edit the file <b>local.properties</b>:
+<p><ul>
+<b>sdk.dir</b>=&lt;path-to-android-sdk><br>
+</ul>
+<p>
+<li>For a one-time TestRunner build, edit the RobotiumTestRunner <b>AndroidManifest.xml</b> file:<br>
+Within the '<b>&lt;instrumentation </b>' element set the '<b>android:targetPackage</b>' attribute to match the package of the AUT you will be testing:
+<p><ul>android:targetPackage="com.my.company.app.package"</ul>
+<p>
+(As an advanced feature, the framework can rebuild the RobotiumTestRunner at runtime to match the targetPackage of whatever AUT is specified for testing.)
+<p>
+<li>In a CMD/Shell/Terminal window navigate to the <b>RobotiumTestRunner</b> project directory.
+<li>Enter '<b>ant debug</b>' to build the <b>RobotiumTestRunner-debug.apk</b>.
+<li>Verify the APK was built in the <b>RobotiumTestRunner</b> '<b>bin</b>' subfolder.
+    <p>On Windows:<br>
+    If you receive a <b>BUILD FAILED</b> message along with "Could not create task or type of type: componentdef.":
+    <p><ul>
+    There is a CLASSPATH issue which is usually resolved by eliminating the System CLASSPATH in the CMD window with:
+    <p><ul>set CLASSPATH=&nbsp;(leave blank)</ul>
+    <p>
+    Then try the '<b>ant debug</b>' command again in that same CMD window.
+    </ul>
+</ul>
+<p>
+<li><b>Rebuild SAFSTestRunner-debug.apk (Optional)</b>:<br>
+Required only once to build with your tester/developer debug profile/certificate.<br>
+<p>
+<ul>
+<li>Go to the <b>SAFSTestRunner</b> project and verify/edit the file <b>local.properties</b>:
+<p><ul>
+<b>sdk.dir</b>=&lt;path-to-android-sdk><br>
+</ul>
+<p>
+<li>For a one-time TestRunner build, edit the SAFSTestRunner <b>AndroidManifest.xml</b> file:<br>
+Within the '<b>&lt;instrumentation </b>' element set the '<b>android:targetPackage</b>' attribute to match the package of the AUT you will be testing:
+<p><ul>android:targetPackage="com.my.company.app.package"</ul>
+<p>
+(As an advanced feature, the framework can rebuild the SAFSTestRunner at runtime to match the targetPackage of whatever AUT is specified for testing.)
+<p>
+<li>In a CMD/Shell/Terminal window navigate to the <b>SAFSTestRunner</b> project directory.
+<li>Enter '<b>ant debug</b>' to build the <b>SAFSTestRunner-debug.apk</b>.
+<li>Verify the APK was built in the <b>SAFSTestRunner</b> '<b>bin</b>' subfolder.
+    <p>On Windows:<br>
+    If you receive a <b>BUILD FAILED</b> message along with "Could not create task or type of type: componentdef.":
+    <p><ul>
+    There is a CLASSPATH issue which is usually resolved by eliminating the System CLASSPATH in the CMD window with:
+    <p><ul>set CLASSPATH=&nbsp;(leave blank)</ul>
+    <p>
+    Then try the '<b>ant debug</b>' command again in that same CMD window.
+    </ul>
+</ul>
+<p>
+<li><b>Repackage your AUT APK with your tester/developer debug profile</b>(if needed):<br>
+<p><ul>
+<li>3rd-party '<b>re-sign.jar</b>' is located in the <b>SoloRemoteControl</b> '<b>libs</b>' subfolder.
+<li>The re-sign application takes 2 parameters:
+<p>
+<ol>
+<li>&lt;in> path to AUT apk to re-sign
+<li>&lt;out> path to newly created AUT-debug.apk
+</ol>
+<p>
+<li>In a CMD/Shell/Terminal window run the re-sign Java program:<br>
+(Practice on the SampleSpinner APK provided with RobotiumRC)
+<p>
+<b>java&nbsp;-jar&nbsp;&lt;path\to\re-sign.jar>&nbsp;&lt;path\to\SpinnerActivity.apk>&nbsp;&lt;out\to\SpinnerActivity-debug.apk></b>
+<p>
+<li>Verify the AUT-debug.apk was built in the target output path.
+</ul>
+<p>
+
+</ol>
+
+<hr/><! ======================================================================>
+<a name="setupnotes" />
+<small><a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#newstuff">What's New</a>&#032;
+</small>
+<p>
+<h3><b>Test Development:</b><br/></h3>
+<p>
+You can use the SoloRemoteControl project installed with RobotiumRemote control as a reference for your own Java development project.<br>
+The SoloRemoteControl/src directory contains all the sourcecode contained in the robotium-remotecontrol.jar.
+<p>
+<ol>
+<li><b>Create your Java development project and reference the following JAR files</b>:<br>
+These can be found in SoloRemoteControl/libs:
+<p><ul><pre>
+robotium-remotecontrol.jar
+robotium-serializable.jar&nbsp;->(only needed if <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingRobotiumRCSerializable.htm#custom" target="using" alt="Using Serializable Classes Doc" title="Using Serializable Classes Doc">using new/custom serialized classes</a>)
+safsautoandroid.jar
+safssockets.jar
+<p>
+re-sign.jar (is also present, but is not normally part of a development project)
+</pre></ul>
+<p>
+<li><b>Create your MyTest class</b>:<br>
+For simplicity, this class should extend the <a href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/solo/SoloTest.html" target="_blank" title="SoloTest JavaDoc">SoloTest class</a>.<br>
+The source for SoloTest can be found in the SoloRemoteControl/src folder at:
+<p>
+
+<ul>com/jayway/android/robotium/remotecontrol/solo/SoloTest.java</ul>
+
+<p>
+You can find the sample code below in the SoloRemoteControl/src folder at:
+<p>
+
+<ul>com/jayway/android/robotium/remotecontrol/MyTest.java</ul>
+
+<p>
+Your MyTest class will need to minimally import a few classes:
+<p>
+<ul><pre>
+import java.util.Properties;
+import com.jayway.android.robotium.remotecontrol.solo.Message;
+import com.jayway.android.robotium.remotecontrol.solo.SoloTest;
+import com.jayway.android.robotium.remotecontrol.solo.Solo;
+
+public class MyTest extends SoloTest{
+
+}
+</pre></ul>
+
+
+<p>
+<li><b>Override/Provide and invoke the same constructors as SoloTest</b>:
+<ul><pre>
+public MyTest(){ super(); }
+public MyTest(String[] args){ super(args); }
+public MyTest(String messengerApk, String testRunnerApk, String instrumentArg){
+    super(messengerApk, testRunnerApk, instrumentArg);
+}
+</pre></ul>
+<p>
+<li><b>Override the static 'main' method for MyTest</b>:
+<ul><pre>
+public static void main(String[] args){
+    SoloTest soloTest = new MyTest(args);
+    soloTest.process();
+}
+</pre></ul>
+
+
+<p>
+<li><b>Override and implement your 'test()' method</b>:<br>
+This is where your remote control test code will go.<br>
+Below is a simple example of using the remote control API:
+<ul><pre>
+protected void test(){
+  try{
+
+      String activityID = solo.getCurrentActivity();
+      Properties props = solo._last_remote_result;
+      String activityName = props.getProperty(Message.PARAM_NAME);
+      String activityClass = props.getProperty(Message.PARAM_CLASS);
+
+      System.out.println("CurrentActivity   UID: "+ activityID);
+      System.out.println("CurrentActivity Class: "+ activityClass);
+      System.out.println("CurrentActivity  Name: "+ activityName);
+
+  }catch(Exception e){
+
+      e.printStackTrace();
+
+  }
+}
+</pre></ul>
+<p><pre>
+Refer to: JavaDoc for <a href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/solo/package-summary.html" target="packageFrame" alt="RobotiumRC API" title="RobotiumRC API">com.jayway.android.robotium.remotecontrol.solo</a>
+          JavaDoc for <a href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/package-summary.html" target="packageFrame" alt="RobotiumRC API" title="RobotiumRC API">com.jayway.android.robotium.remotecontrol</a>
+
+Also review: <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingRobotiumRCSerializable.htm" target="using" alt="Using Serializable Classes Doc" title="Using Serializable Classes Doc">Using Serializable in Robotium RemoteControl</a>
+</pre><p>
+<li><b>Compile your work appropriate for your development environment</b>:<br>
+Remember, the minimum JAR files needed in the Java build path (CLASSPATH):
+<p><ul><pre>
+robotium-remotecontrol.jar
+robotium-serializable.jar&nbsp;->(only needed if <a href="http://safsdev.sourceforge.net/sqabasic2000/UsingRobotiumRCSerializable.htm#custom" target="using" alt="Using Serializable Classes Doc" title="Using Serializable Classes Doc">using new/custom serialized classes</a>)
+safsautoandroid.jar
+safssockets.jar
+</pre></ul>
+<p>
+(The above can be found in the SoloRemoteControl/libs folder.)
+<p>
+<li><b>Run the test using all appropriate <a href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/solo/SoloTest.html" target="_blank" title="SoloTest JavaDoc">command-line parameters for SoloTest</a></b>:<br>
+Remember, the same JAR files needed for the build are needed in the CLASSPATH for execution.
+<p>
+For example, the following command (all on one line) for the RobotiumTestRunner:
+<ul><pre>
+java <b>com.jayway.android.robotium.remotecontrol.MyTest</b>
+     aut=&lt;path-to-your/aut-debug.apk>
+     messenger=&lt;path-to/SAFSTCPMessenger-debug.apk>
+     runner=&lt;path-to/RobotiumTestRunner-debug.apk>
+     instrument=com.jayway.android.robotium.remotecontrol.client/com.jayway.android.robotium.remotecontrol.client.RobotiumTestRunner
+     avd=SprintEvo (only if sending to an emulator)
+</pre></ul>
+<p>
+The equivalent command (all on one line) for the SAFSTestRunner:
+<ul><pre>
+java <b>com.jayway.android.robotium.remotecontrol.MyTest</b>
+     aut=&lt;path-to-your/aut-debug.apk>
+     messenger=&lt;path-to/SAFSTCPMessenger-debug.apk>
+     runner=&lt;path-to/SAFSTestRunner-debug.apk>
+     instrument=org.safs.android.engine/org.safs.android.engine.DSAFSTestRunner
+     avd=SprintEvo (only if sending to an emulator)
+</pre></ul>
+<p>
+Then, hopefully, you should see a torrent of activity appear in the console and, eventually, the SAFS Messenger service go active on the device/emulator. &nbsp;This would be followed by the launching of the AUT, a brief pause for the execution of the getCurrentActivity call, and then a shutdown of the AUT and SAFS Messenger service.
+<p>
+If all went well, you should see your System.out text not too far from the end of the console output.  The output will contain something like:
+<p>
+<ul><pre>
+CurrentActivity   UID: 669d9657-6d3b-4706-994b-6cb6a7cc3235
+CurrentActivity Class: com.android.example.spinner.SpinnerActivity
+CurrentActivity  Name: SpinnerActivity
+</pre>
+</ul>
+</ol>
+<hr>
+<h3>Take your test automation even further...</h3>
+<p>
+Robotium Remote Control has been initially coded as a subproject of the <a href="http://safsdev.sourceforge.net" target="_blank" title="SAFSDEV Project Home Page">SAFSDEV Project</a>.
+<p>
+SAFSDEV has integrated this into the larger and more full-featured SAFS test automation framework. &nbsp;One development environment. &nbsp;
+One JSAFS API--regardless of the application technology being tested or the tool integrations used to test it. &nbsp;Thus providing extensive support for all of the technologies below within a single reusable testing framework.
+<p><ul>
+<li>Java on Windows
+<li>Web Apps on Windows
+<li>Flex Apps on Windows
+<li>.NET, WPF on Windows
+<li><b>Apple IOS for iPhone and iPad Apps</b>
+<li><b>Android Tablet and Phone Apps</b>
+<li><B>Image-Based Testing</b> (Anything on PC/MAC screen)
+<li><b>Extensive NLS Support</b> (One test, many languages)
+<li>Fully extendable for integrating other technologies and platforms.
+</ul>
+<p>
+<b>SAFS Engines</b> (Tool Integrations):
+<p><ul>
+<li>SAFS Android w/ Android SDK
+<li>Robotium Remote Control w/ Android SDK
+<li>Apple XCode SDK w/ IOS UIAutomation
+<li>SmartBear/AutomatedQA Test Complete
+<li>IBM Rational Functional Tester
+<li>IBM Rational Robot
+<li>Java AWT Robot w/ Java Advanced Imaging (JAI)
+</ul>
+
+<hr/><! ======================================================================>
+<a name="newstuff" />
+<small><a href="#definitions">Definitions</a>,&#032;
+<a href="#reminders">Critical Reminders</a>,&#032;
+<a href="#instructions">Install Instructions</a>,&#032;
+<a href="#setupnotes">Test Development</a>&#032;
+</small>
+<p>
+<h3><b>What's New</b>:<br/></h3>
+Since 2012.12.12:
+<p>
+<ul>
+<li>Added support for Robotium 3.6.
+</ul>
+</body></html>

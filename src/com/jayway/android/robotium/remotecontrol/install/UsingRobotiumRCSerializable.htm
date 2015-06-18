@@ -1,0 +1,200 @@
+<HTML>
+<HEAD>
+<TITLE>Using Serializable in Robotium RemoteControl</TITLE>
+</HEAD>
+<BODY>
+<A name="top"/>
+<CENTER><H1>Using Serializable in Robotium RemoteControl</H1></CENTER>
+Released Jun 26, 2013 by Lei Wang and Carl Nagle
+<HR>
+<A name="contents"/>
+<H3>Contents</H3>
+<pre>
+  1. <A href="#what" title="Jump To" alt="Jump To">What are RobotiumRC Serializable classes</A>
+
+  2. <A href="#how" title="Jump To" alt="Jump To">How to use Serializable classes in RobotiumRC</A>
+
+     2.1 <A href="#directly" title="Jump To" alt="Jump To">Used directly</A>
+     2.2 <A href="#internally" title="Jump To" alt="Jump To">Used internally</A>
+     2.3 <A href="#custom" title="Jump To" alt="Jump To">When to implement a new custom class</A>
+
+         2.3.1 <A href="#waitforcondition1" title="Jump To" alt="Jump To">Standard Robotium waitForCondition Usage</A>
+         2.3.2 <A href="#waitforcondition2" title="Jump To" alt="Jump To">RobotiumRC waitForCondition Usage</A>
+
+  3. <A href="#why" title="Jump To" alt="Jump To">Why we need these Serializable classes</A>
+</pre>
+<HR>
+<DL>
+<A name="what"/>
+<DT><H3>1. What are RobotiumRC Serializable classes?</H3>
+<DD>RobotiumRC serializable classes are defined in the package:
+<p>
+<pre>
+    <A href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/package-frame.html" title="RemoteControl Serializable Classes JavaDoc" alt="RemoteControl Serializable Classes JavaDoc" target="packageFrame">com.jayway.android.robotium.remotecontrol</A>
+</pre><p>
+They are compressed to a jar file:
+<p><pre>
+    <b>robotium-serializable.jar</b>
+</pre><p>
+After the installation of RobotiumRC, this jar file can be found in:
+<p><pre>
+    <b>&lt;robotiumrc>\SoloRemoteControl\libs</b>
+</pre><p>
+For example <b>C:\robotiumrc\SoloRemoteControl\libs</b> if you accepted the default installation directory on Windows.
+<p>
+For now, this jar is including the following classes:
+<p><pre>
+    <A href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/By.html" title="RemoteControl Serializable Classes JavaDoc" alt="RemoteControl Serializable Classes JavaDoc" target="classFrame">com.jayway.android.robotium.remotecontrol.By</A>
+    <A href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/Condition.html" title="RemoteControl Serializable Classes JavaDoc" alt="RemoteControl Serializable Classes JavaDoc" target="classFrame">com.jayway.android.robotium.remotecontrol.Condition</A>
+    <A href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/ObjectCollection.html" title="RemoteControl Serializable Classes JavaDoc" alt="RemoteControl Serializable Classes JavaDoc" target="classFrame">com.jayway.android.robotium.remotecontrol.ObjectCollection</A>
+    <A href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/PointF.html" title="RemoteControl Serializable Classes JavaDoc" alt="RemoteControl Serializable Classes JavaDoc" target="classFrame">com.jayway.android.robotium.remotecontrol.PointF</A>
+</pre>
+<A name="how"/>
+<DT><h3>2. How to use Serializable classes in RobotiumRC</H3>
+<p>
+<A name="directly"/>
+<DD><H4>2.1	Used directly</H4>
+<p><UL>
+For the following 2 classes, the user can use them in the same way as calling the Robotium API:
+<p><pre>
+    <A href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/By.html" title="RemoteControl By Class JavaDoc" alt="RemoteControl By Class JavaDoc" target="classFrame">com.jayway.android.robotium.remotecontrol.By</A>
+    <A href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/PointF.html" title="RemoteControl PointF Class JavaDoc" alt="RemoteControl PointF Class JavaDoc" target="classFrame">com.jayway.android.robotium.remotecontrol.PointF</A></pre>
+<p>
+Instead of using:
+<pre>
+    <b>com.jayway.android.robotium.solo.By</b>, with
+    <b>android.graphics.PointF</b>
+</pre>
+the developer will use:
+<pre>
+    <b>com.jayway.android.robotium.remotecontrol.By</b>,  with
+    <b>com.jayway.android.robotium.remotecontrol.PointF</b>
+</pre>
+For example:
+<p>
+When calling RobotiumRC API <b>clearTextInWebElement(By)</b>, user can call like this:
+<pre>
+    By by = By.id(“webElementID”);
+    solo.clearTextInWebElement(by);
+</pre>
+When calling API <b>rotateSmall(PointF, PointF)</b>, user can call like this:
+<pre>
+    PointF center1 = new PointF(10.0, 10.0);
+    PointF center2 = new PointF(50.0, 50.0);
+    solo.rotateSmall(center1, center2);
+</pre>
+</UL>
+<A name="internally"/>
+<H4>2.2	Used internally</H4>
+<p><UL>
+The class <A href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/ObjectCollection.html" title="RemoteControl ObjectCollection Class JavaDoc" alt="RemoteControl ObjectCollection Class JavaDoc" target="classFrame">com.jayway.android.robotium.remotecontrol.ObjectCollection</A> is used internally to transport a series of objects across the TCP Messenger protocol. Normally, test developers will not  use this directly.
+</UL>
+<A name="custom"/>
+<H4>2.3	When to implement a new custom class</H4>
+<p><UL>
+The class <A href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/Condition.html" title="RemoteControl Condition Class JavaDoc" alt="RemoteControl Condition Class JavaDoc" target="classFrame">com.jayway.android.robotium.remotecontrol.Condition</A> is an abstract class containing one method to be implemented by the user. Below are 2 examples to call waitForCondition(Condition): one in traditional Robotium code, and the other in RobotiumRC code.  Compare them and learn how to call waitForCodition(Condition) in RobotiumRC.
+<p>
+The Conditions we have coded below return true if <b>ALL</b> the current Views are 'visible'.
+<p>
+<A name="waitforcondition1"/>
+<H5>2.3.1 Standard Robotium waitForCondition Usage</H5>
+<UL><p><code><pre>
+// native device-side Robotium
+void testCondition() {
+    solo.waitForCondition(new <b>MyCondition</b>(), 10);
+}
+
+// native device-side Robotium
+//com.jayway.android.robotium.solo.Condition
+public class <b>MyCondition</b> implements Condition {
+
+    public boolean <b>isSatisfied</b>() {
+        boolean satisfied = true;
+        //If all current views are visible,
+        //the condition is satisfied.
+        List<View> views = solo.getCurrentViews();
+	    for (int i = 0; i < views.size(); i++) {
+    	    satisfied &= views.get(i).isShown();
+    	    if (!satisfied) break;
+    	}
+    	return satisfied;
+    }
+}
+</pre></code>
+</UL><p>
+<A name="waitforcondition2"/>
+<H5>2.3.2 RobotiumRC waitForCondition Usage</H5>
+<UL><p>
+In the default package (or user's prefered package), create a subclass of com.jayway.android.robotium.remotecontrol.Condition:
+<p><pre>
+//Serializable class needed on both controller and device
+//com.jayway.android.robotium.remotecontrol.Condition
+public class <b>MyCondition</b> extends Condition{
+
+    public boolean <b>isSatisfied</b>() {
+        boolean satisfied = true;
+        try{
+            // View UIDs provided by controller converted to real device-side objects
+            List&lt;Object> views = this.<A href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/Condition.html#getObjects()" title="RemoteControl Condition Class JavaDoc" alt="RemoteControl Condition Class JavaDoc" target="classFrame">getObjects()</A>;
+
+            //The TestRunner itself is always item(0) in the list
+            //RobotiumTestRunner runner = (RobotiumTestRunner) views.get(0);
+            //Solo solo = runner.getSolo();
+
+            //Remaining objects (Views) begin at item(1)
+            for(int i = 1 ; i &lt; views.size(); i++){
+                satisfied &= ((View) views.get(i)).isShown();
+                if(!satisfied) break;
+            }
+        }catch(Exception e){
+            satisfied = false;
+        }
+        return satisfied;
+    }
+}
+</pre>
+<p>
+This class will be used on the controller-side AND on the device-side.  The class must be available at runtime on the device in the rebuilt TestRunner. We recommend packaging your custom Serializable classes in your own JAR file, or adding them to the <b>robotium-serializable.jar</b> file for the TestRunner project build.
+<p>
+Depending on the complexity of your isSatisfied() method, and the types of objects that must be referenced, JAR files like Android SDK JARs, or the robotium-4.x.JAR normally used only in the TestRunner project may have to be referenced in your Build Path (CLASSPATH) in your RemoteControl project as well.
+<p>
+Finally, the part where we use the Serializable instance on the controller and send it to the TestRunner at runtime:
+<p><pre>
+//RemoteControl controller side use
+void testCondition(){
+
+    //com.jayway.android.robotium.remotecontrol.Condition
+    Condition condition = new MyCondition();
+
+    //com.jayway.android.robotium.remotecontrol.solo.Solo
+    List listviews = solo.<A href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/solo/Solo.html#getCurrentListViews()" title="RemoteControl Solo Class JavaDoc" alt="RemoteControl Solo Class JavaDoc" target="classFrame">getCurrentListViews()</A>;
+    condition.<A href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/Condition.html#addObjects%28java.util.List%29" title="RemoteControl Condition Class JavaDoc" alt="RemoteControl Condition Class JavaDoc" target="classFrame">addObjects(listviews)</A>;
+
+    //internally transports MyCondition with all object UIDs to device-side
+    solo.<A href="http://safsdev.sourceforge.net/doc/com/jayway/android/robotium/remotecontrol/solo/Solo.html#waitForCondition%28com.jayway.android.robotium.remotecontrol.Condition,%20int%29" title="RemoteControl Solo Class JavaDoc" alt="RemoteControl Solo Class JavaDoc" target="classFrame">waitForCondition(condition, 10)</A>;
+   }
+</pre>
+The point is, the RemoteControl Condition class holds a List of String UIDs from the controller side and the user needs to put the current UIDs into the List at runtime. On the device side our Serializable implementation will get the real View objects from an internal cache and substitute them into the List.
+<p>
+Keep in mind, the first object [ List item(0) ] is reserved as the TestRunner object itself.  The actual View objects will start at List item(1).
+</UL></UL>
+<p>
+<A name="why"/>
+<DT><H3>3. Why we need these Serializable classes</H3>
+<DD>Before Robotium 4.0, Robotium's API solely used primitive types such as Strings and ints as API parameters.  It was easy to pass these as String representations through the TCP Messenger from the controller side to the TestRunner on the device side.
+<p>
+Beginning with Robotium 4.0, Robotium introduced new APIs accepting complex object instances or Interfaces for some parameters.  The most obvious example of this is the Condition Interface used in <A href="http://robotium.googlecode.com/svn/doc/com/jayway/android/robotium/solo/Solo.html#waitForCondition%28com.jayway.android.robotium.solo.Condition,%20int%29" alt="Robotium Solo JavaDoc" title="Robotium Solo JavaDoc" target="classFrame">Solo.waitForCondition(Condition)</A>.
+<p>
+This Condition is just an Interface containing one method. Thus, RemoteControl has to have a way to pass the object implementing the Interface along with whatever objects the Interface might need to get its job done.  We decided to pass the objects via Serialization between the controller and the TestRunner on the device.  This requires the individual classes be Serializable--which the standard classes are not.
+<p>
+Robotium and Android classes NOT Serializable we have dealt with are listed below.  There is a RemoteControl version of each of these classes that can be Serialized and sent to the TestRunner to satisfy the new Robotium API arguments:
+<p><pre>
+    com.jayway.android.robotium.solo.By
+    com.jayway.android.robotium.solo.Condition
+    android.graphics.PointF
+</pre>
+<p>
+In addition, since it is often likely the Condition may need an object reference to the running TestRunner, or the traditional Robotium Solo object, or other native objects familiar to Robotium users gleaned from the TestRunner Instrumentation--we provide the device-side deserialized object with a reference to the TestRunner--which the controller side does not have and cannot provide.
+</DL>
+<HR>
+</BODY></HTML>

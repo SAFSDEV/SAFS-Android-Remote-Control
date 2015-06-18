@@ -1,0 +1,282 @@
+<job id="Setup-Win" >
+<script language="VBScript" src="sharedFunctions.vbs"/>
+<script language="VBScript" >
+
+'******************************************************************************
+'* 
+'* Setup-Win.WSF  --  *** MUST BE RUN WITH 32-BIT WSH on 64-BIT SYSTEMS ***
+'*
+'* This installation script requires that a Java runtime environment (JRE/JVM) 
+'* is already installed on the target machine.  For best results and ease of 
+'* installation, a JVM Version of 1.6 or higher is recommended.
+'* 
+'* The JVM must be in the normal search path for the system.  The following 
+'* command line typed at any command prompt should successfully list the version 
+'* of Java JVM installed:
+'* 
+'*     java -version
+'* 
+'* You can download and install a JVM if necessary from the following:
+'* 
+'*     http://www.oracle.com/technetwork/java/javase/downloads/
+'* 
+'* Required assets for this install:
+'* 
+'*     sharedFunctions.VBS     - must exist in the same directory as this script
+'*     RobotiumRCInstall.jar   - Java setup program
+'*     RobotiumRCInstall.zip   - files to be installed
+'*     
+'*     
+'* The install can begin from any directory, but all the above assets must 
+'* exist in that same directory.
+'* 
+'* 
+'* Default Installation Destination Directory:
+'*     
+'*     C:\robotiumrc
+'*     
+'* The user can change this by pre-setting ROBOTIUMRC_HOME to the desired path.
+'*     
+'* The affected environment variables and their backups are listed below:
+'* 
+'*     VARIABLE          BACKUP VARIABLE     PURPOSE
+'*     ============      ===============     ==================================
+'*     ROBOTIUMRC_HOME                       Install Path
+'* 
+'* Author: Carl Nagle
+'* Original Release: JUN 29, 2012
+'*     
+'* Copyright (C) SAS Institute
+'* General Public License: http://www.opensource.org/licenses/gpl-license.php
+'******************************************************************************
+
+Dim shell, env, fso
+Dim exec
+Dim args
+
+Dim numerrors, message, response
+
+Dim currentJavaVersion, currentJavaMinorVersion
+
+Dim safsdir, safsenv, safstitle, sdkdir
+Dim installsafs
+Dim prompt, toDebug
+Dim testrunner
+
+CONST good_java_major = "1"
+Const good_java_minor = "5"
+
+CONST OK_BUTTON_CLICKED=1
+CONST CANCEL_BUTTON_CLICKED=2
+CONST ABORT_BUTTON_CLICKED=3
+CONST RETRY_BUTTON_CLICKED=4
+CONST IGNORE_BUTTON_CLICKED=5
+CONST YES_BUTTON_CLICKED=6
+CONST NO_BUTTON_CLICKED=7
+
+Dim cr
+Dim q
+Dim nl
+Dim newline
+
+cr        = chr(13)   'carriage return
+q         = chr(34)   'double quote
+nl		  = chr(10)		'next line
+newline   = cr & nl		'use "carriage return" and "next line" to form a newline
+
+numerrors = 0
+'set prompt to false if you do not want see debug message
+prompt = true
+toDebug = false
+
+safstitle = "RobotiumRC Install"
+safsdir = "C:\robotiumrc"
+safsenv="ROBOTIUMRC_HOME"
+installsafs = true
+testrunner = "SAFSTestRunner"
+
+WScript.Interactive = True
+
+Set shell = WScript.CreateObject("WScript.Shell")
+Set env   = shell.Environment("SYSTEM")
+Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
+Set args  = WScript.Arguments
+
+Dim arg
+Dim targ, cmdline, wshexe
+Dim msg, returncode
+
+wshexe = getSystem32Dir() &"\cscript.exe"
+
+'=====================            CHECK JAVA VERSION        ===============================================
+currentJavaVersion = getJavaVersion()
+currentJavaMinorVersion = getMinorVersion(currentJavaVersion)
+debug("currentJavaVersion: " & currentJavaVersion & cr & "currentJavaMinorVersion: " & currentJavaMinorVersion)
+
+response = checkJavaVersion(good_java_major, good_java_minor)
+if response < 0 then WScript.Quit
+'==========================================================================================================
+
+cmdline = "java -jar robotiumrcinstall.jar -robotiumrc "
+
+targ = ""
+if (args.Count > 0) then
+    For i = 0 to args.Count -1
+	    arg = args(i)
+	    if (i > 0) then targ = targ &" "
+	    targ = targ & arg
+	Next
+
+    arg = targ
+
+    'remove any trailing '\' or '/'
+    '====================================================
+    if ((Right(arg,1)="\")or(Right(arg,1)="/")) then
+        arg = Left(arg, Len(arg)-1)
+    end if    
+    sdkdir = arg
+else
+    sdkdir = env("ANDROID_HOME")
+end if
+
+'check the android sdk dir
+if (Len(sdkdir) = 0) then
+	'Can't get android home
+	msg = "Your environment ANDROID_HOME is NOT set. Continue Installation?" & cr
+	msg = msg &"Click YES to install without Android SDK; NO to stop." & cr
+	msg = msg &"STRONGLY recommanded to select NO and set ANDROID_HOME firstly!"
+	returncode = shell.Popup(msg, 0, safstitle, 32+4+256)
+	if ((returncode = 2) Or (returncode = 7)) Then
+		WScript.Quit
+	end if
+end if
+
+if(prompt) then shell.Popup "Using ANDROID_HOME setting of"& cr & sdkdir,0,safstitle,64
+
+'use previous install RobotiumRC directories if existing
+'==========================================================
+arg = ""
+arg = env(safsenv)
+if Len(arg)> 0 then
+	safsdir = arg
+else
+	env(safsenv)=safsdir
+end if
+
+'reset/clear variable
+arg=""
+
+'=====================================
+'==   Allow User to Cancel Setup   === 
+'=====================================
+if ((prompt)AND(installsafs)) then
+    'Call safsSetupWizard to let user decide if install
+    'safsdir is target safs directory at any time for installation
+    response = safsSetupWizard(safsdir)
+
+    if (response = 0) then  
+        shell.Popup "Nothing Installed.",0,safstitle,64
+        WScript.Quit
+    end if
+	cmdline = cmdline & safsdir
+	
+	'add parameter androidhome if it exists
+	if (Len(sdkdir) > 0) then
+		cmdline = cmdline & " -androidhome " & sdkdir
+	end if
+	
+	cmdline = cmdline & " -testrunner " & testrunner
+	
+	'give user the chance to build runner and messenger automatically
+	msg = "Do you want to build the SAFSTestRunner and SAFSTCPMessenger automatically?  " 
+	msg = msg &"This will enable install verification using the sample SpinnerActivity app."& cr & cr
+	msg = msg &"Click YES to proceed; NO to skip the automatic build process."
+    returncode = shell.Popup(msg, 0, safstitle, 32+4) 
+    if ((returncode = 2) Or (returncode = 7)) Then
+		'Clicked the No button to refuse build automatically
+	else
+	    'Want to build Runner and Messenger automatically, Need to detect the 'Ant Tool Home'
+	    targ = env("ANT_HOME")
+	    if (Len(targ) = 0) then
+		'Can't get ant home
+		msg = "Your environment ANT_HOME is NOT set. Continue Installation?" & cr & cr
+		msg = msg &"Click YES to install without the automatic builds.  NO to cancel and manually fix ANT_HOME."
+		returncode = shell.Popup(msg, 0, safstitle, 32+4) 
+		if ((returncode = 2) Or (returncode = 7)) Then
+		    WScript.Quit
+		end if
+	    else
+		'got the ant tool home
+		shell.Popup "Using ANT_HOME setting of"& cr & targ,0,safstitle,64
+		cmdline = cmdline & " -dobuild " & " -anthome " & targ			
+	    end if
+	
+	    msg = "Do you want to automatically re-sign the sample SpinnerActivity app?  " 
+	    msg = msg &"This will make install verification easier."& cr & cr
+	    msg = msg &"Click YES to proceed; NO to skip the automatic re-sign process."
+	
+            returncode = shell.Popup(msg, 0, safstitle, 32+4) 
+            if ((returncode = 2) Or (returncode = 7)) Then
+	        'Clicked the No button to refuse re-sign automatically
+	    else
+  	        cmdline = cmdline &" -resignjar "& q & safsdir &"\\SoloRemoteControl\\libs\\re-sign.jar"& q
+  	        cmdline = cmdline &" -originalapk "& q & safsdir &"\\SampleSpinner\\bin\\SpinnerActivity.apk"& q
+  	        cmdline = cmdline &" -resignedapk "& q & safsdir &"\\SampleSpinner\\bin\\SpinnerActivity-debug.apk"& q
+	    end if
+
+    end If
+	
+end if
+
+msg = ""
+
+' invoke java -jar robotiumrcinstall.jar -robotiumrc safsdir
+'===================================================
+if (installsafs) then
+
+    On Error Resume Next
+    Set exec = shell.Exec(cmdline)
+
+    If Err.Number <> 0 then
+        WScript.Interactive = True
+        shell.Popup "Error <"& CStr(Err.Number) &":"& Err.Description &"> occurred while trying to launch Java.",0, "Installation Aborted.",16
+        Wscript.Quit    
+    End if
+
+    On Error Goto 0
+
+    arg = ""
+    Do While Exec.Status = 0
+        arg = arg & readall(exec)
+        WScript.Sleep(3000)
+    Loop
+
+    On Error Resume Next
+    Set OutStream = fso.OpenTextFile(safsdir &"\install\setup.log", 2, True)
+    msg = msg & cr &"Consult the "& safsdir &"\install\setup.log for complete details."
+    OutStream.Write arg
+    On Error Goto 0
+
+    if InStr(1, arg, "Error:", 1) > 0  then
+        msg = msg & cr &"Errors were detected while trying to run Java."
+    end if
+
+    if InStr(1, arg, "Warning:", 1) > 0  then
+        msg = msg & cr &"Warnings were detected while trying to run Java."
+    end if
+
+end if
+
+if installsafs then    
+    if (prompt) then shell.Popup "Installation Complete."& msg,0,safstitle,64
+else
+    if (prompt) then shell.Popup "Nothing Installed.",0,safstitle,64
+end if
+
+Set shell = nothing
+Set env   = nothing
+Set exec  = nothing
+Set fso   = nothing
+
+</script>
+</job>

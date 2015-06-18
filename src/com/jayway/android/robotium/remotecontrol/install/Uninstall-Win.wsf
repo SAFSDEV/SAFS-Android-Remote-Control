@@ -1,0 +1,32 @@
+<job id="UninstallWin" >
+<script language="VBScript" src="sharedFunctions.vbs"/>
+<script language="VBScript" >
+
+'*********************************************************************************************
+'* Required assets for this uninstall:
+'* 
+'*     sharedFunctions.VBS     - must exist in the same directory as this script
+'*
+'*********************************************************************************************
+
+Dim shell, env, fso
+Dim safsenv, tess_ocr_prefix, g_ocr_data_dir, tcafs_home
+
+Dim cr
+cr        = chr(13)   'carriage return
+safsenv         = "ROBOTIUMRC_HOME" 'Environment Variable for root directory.
+
+WScript.Interactive = True
+
+Set shell = WScript.CreateObject("WScript.Shell")
+Set env   = shell.Environment("SYSTEM")
+Set fso   = WScript.CreateObject("Scripting.FileSystemObject")
+
+UnInstallRobotiumRC()
+
+Set shell = nothing
+Set env   = nothing
+Set fso   = nothing
+
+</script>
+</job>
