@@ -18,22 +18,20 @@ public class MyTest extends SoloTest{
   }
 
 	protected void test(){
-	  try{
-
+		String action = "MyTest";
+	    try{
 		  String activityID = solo.getCurrentActivity();
 		  Properties props = solo._last_remote_result;
 		  String activityName = props.getProperty(Message.PARAM_NAME);
 		  String activityClass = props.getProperty(Message.PARAM_CLASS);
 
-		  System.out.println("CurrentActivity   UID: "+ activityID);
-		  System.out.println("CurrentActivity Class: "+ activityClass);
-		  System.out.println("CurrentActivity  Name: "+ activityName);
+		  log.pass(action, "CurrentActivity   UID: "+ activityID);
+		  log.pass(action, "CurrentActivity Class: "+ activityClass);
+		  log.pass(action, "CurrentActivity  Name: "+ activityName);
 
-	  }catch(Throwable e){
-
-		  e.printStackTrace();
-
-	  }
+	    }catch(Throwable e){
+		    e.printStackTrace();
+	    }
 	}
 }
 

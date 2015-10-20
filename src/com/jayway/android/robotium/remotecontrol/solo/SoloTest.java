@@ -5,6 +5,7 @@
 package com.jayway.android.robotium.remotecontrol.solo;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
@@ -179,6 +180,15 @@ public class SoloTest{
 	 * It will be used in method {@link #goBackToViewUID(String)} to prevent infinite loop.<br>
 	 */
 	protected String mainActivityUID = null;
+
+	/**
+	 * True to enable LogsInterface debug logging, false otherwise.
+	 * @see #isDebugEnabled()
+	 * @see #enableDebug(boolean)
+	 */
+	protected boolean debugEnabled = false;	
+	
+	protected LogsInterface log = null;
 	
 	/** true if we received the 'aut' command-line argument, or setAUTApk() was called. */
 	public boolean argAUTpassed = false;
@@ -355,6 +365,22 @@ public class SoloTest{
 	}
 	
 	/**
+	 * Set the LogsInterface, or replace it with null.
+	 */
+	public void setLogsInterface(LogsInterface ilog){
+		log = ilog;
+	}
+	
+	/**
+	 * Subclasses can override to initialize their own LogsInterface.
+	 * @return LogsInterface or null if not set
+	 * @see #prepareLogsInterface()
+	 */
+	public LogsInterface getLogsInterface(){
+		return log;
+	}
+	
+	/**
 	 * Turn on or off the protocol's debug message
 	 * @param enable
 	 */
@@ -391,38 +417,53 @@ public class SoloTest{
 	}
 
 	/**
+	 * Called during preparation().
+	 * Default implementation initializes a LogsImpl LogsInterface 
+	 * logging to the User's Working Directory if a valid LogsInterface is not returned by getLogsInterface().
+	 * @see #getLogsInterface()
+	 * @see #setLogsInterface(LogsInterface)
+	 * @see #preparation()
+	 * @throws IOException
+	 */
+	protected void prepareLogsInterface() throws IOException{
+		if(getLogsInterface() == null) setLogsInterface(new LogsImpl());
+	}
+	
+	/**
 	 * A template method.<br>
 	 * 
+	 * @see #prepareLogsInterface()
+	 * @see #prepareDevice()
 	 * @see #preparation()
 	 * @see #initialize()
 	 * @see #test()
 	 * @see #terminate()
 	 */
 	final public void process(){
+		String action = ".process()";
 		if(!preparation()){
-			error("Preparation error");
+			log.fail(action, "Preparation error");
 			//stop the emulator if we have launched it.
 			if(!stopEmulator()){
-				warn("We fail to stop the emulator launched by us.");
+				log.warn(action, "We fail to stop the emulator launched by us.");
 			}
 			return;
 		}
 		try{
 			if(initialize()){
-				debug("Begin Test.");
+				log.info("Begin Test.");
 				test();
-				debug("End Test.");
+				log.info("End Test.");
 			}			
 		}catch(Throwable e){
-			error("Met Exception "+e.getClass().getSimpleName()+":"+e.getMessage());
+			log.fail(action, "Met Exception "+e.getClass().getSimpleName()+":"+e.getMessage());
 		}finally{
 			//Whether the 'remote engine' has been started or not
 			//we will call the method terminate() to stop the local controller runner.
 			if(!terminate()){
-				warn("Termination of Solo fail!");
+				log.warn(action, "Termination of Solo fail!");
 			}			
-		}
-		
+		}		
 	}
 	
 	/**
@@ -430,11 +471,13 @@ public class SoloTest{
 	 * Forward the tcp port from on-computer-2411 to on-device-2410<br>
 	 * 
 	 * @return	True if the preparation is finished successfully.
+	 * @see #prepareLogsInterface()
+	 * @see #prepareDevice()
 	 */
 	final protected boolean preparation(){
-		String debugPrefix = ".preparation() ";
-
+		String action = ".preparation()";
 		try{
+			prepareLogsInterface();
 			if(!prepareDevice()){
 				throw new RuntimeException("Can't detect connected device/emulator!");
 			}
@@ -442,36 +485,36 @@ public class SoloTest{
 			// 1. Install apks
 			if (installAUT) {
 				if(getResignJar()!=null){
-					debug("RESIGNING " + autApk);
+					log.debug("RESIGNING " + autApk);
 					DUtilities.resignAUTApk(resignJar, autApk);
 				}
-				debug("INSTALLING " + autApk);
+				log.debug("INSTALLING " + autApk);
 				DUtilities.installReplaceAPK(autApk);
 			} else {
-				debug("BYPASSING INSTALLATION of target AUT...");
+				log.debug("BYPASSING INSTALLATION of target AUT...");
 			}
 	
 			if (installMessenger) {
-				debug("INSTALLING " + messengerApk);
+				log.debug("INSTALLING " + messengerApk);
 				DUtilities.installReplaceAPK(messengerApk);
 			} else {
-				debug("BYPASSING INSTALLATION of SAFS Messenger...");
+				log.debug("BYPASSING INSTALLATION of SAFS Messenger...");
 			}
 	
 			// Before installing the TestRunner apk, we may repackage it.
 			if (installRunner) {
 				if (rebuildRunner) {
-					debug("REBUILDING " + testRunnerApk);
+					log.debug("REBUILDING " + testRunnerApk);
 					testRunnerApk = DUtilities.rebuildTestRunnerApk(testRunnerSourceDir, autApk, testRunnerApk, instrumentArg, true);
 					if (testRunnerApk==null) {
-						throw new RuntimeException(debugPrefix + " Fail to repackage the TestRunner apk!");
+						throw new RuntimeException(action + " Fail to repackage the TestRunner apk!");
 					}
 				}
 	
-				debug("INSTALLING " + testRunnerApk);
+				log.debug("INSTALLING " + testRunnerApk);
 				DUtilities.installReplaceAPK(testRunnerApk);
 			} else {
-				debug("BYPASSING INSTALLATION of Instrumentation Test Runner...");
+				log.debug("BYPASSING INSTALLATION of Instrumentation Test Runner...");
 			}
 	
 			// 2. Launch the InstrumentationTestRunner
@@ -483,13 +526,15 @@ public class SoloTest{
 			boolean portForwarding = true;
 			solo.setPortForwarding(portForwarding);
 				
-			debug("Prepare for test successfully.");
+			log.debug("Prepare for test successfully.");
 
 		}catch(RuntimeException e){
-			error("During preparation, met exception="+e.getMessage());
+			log.fail(action, "During preparation, met RuntimeException="+e.getMessage());
 			return false;
-		}
-		
+		}catch(IOException e){
+			log.fail(action, "During preparation, met IOException="+e.getMessage());
+			return false;
+		}		
 		return true;
 	}
 	
@@ -500,29 +545,29 @@ public class SoloTest{
 		List<String> devices = null;
 		try{
 			devices = DUtilities.getAttachedDevices();
-			info("Detected "+ devices.size() +" device/emulators attached.");
+			log.info("Detected "+ devices.size() +" device/emulators attached.");
 			if(devices.size() == 0){
 				DUtilities.DEFAULT_EMULATOR_AVD = avdSerialNo;
 				if((DUtilities.DEFAULT_EMULATOR_AVD != null) && (DUtilities.DEFAULT_EMULATOR_AVD.length()> 0)){
 					//DUtilities.killADBServer();
 					//try{Thread.sleep(5000);}catch(Exception x){}
-					info("Attempting to launch EMULATOR_AVD: "+ DUtilities.DEFAULT_EMULATOR_AVD);
+					log.info("Attempting to launch EMULATOR_AVD: "+ DUtilities.DEFAULT_EMULATOR_AVD);
 					if (! DUtilities.launchEmulatorAVD(DUtilities.DEFAULT_EMULATOR_AVD)){
 						String msg = "Unsuccessful launching EMULATOR_AVD: "+DUtilities.DEFAULT_EMULATOR_AVD +", or TIMEOUT was reached.";
-						debug(msg);
+						log.debug(msg);
 						return false;							
 					}else{
 						weLaunchedEmulator = true;
-						info("Emulator launch appears to be successful...");
+						log.info("Emulator launch appears to be successful...");
 						havedevice = true;
 						if(unlockEmulatorScreen) {
 							String stat = DUtilities.unlockDeviceScreen()? " ":" NOT ";
-							info("Emulator screen was"+ stat +"successfully unlocked!");
+							log.info("Emulator screen was"+ stat +"successfully unlocked!");
 						}						
 					}
 				}else{
 					String msg = "No Devices found and no EMULATOR_AVD specified in configuration file.";
-					debug(msg);
+					log.debug(msg);
 					return false;							
 				}				
 			}else if(devices.size() > 1){
@@ -535,7 +580,7 @@ public class SoloTest{
 					String lcdevice = null;
 					for(;(d < devices.size())&&(!matched);d++){
 						lcdevice = ((String)devices.get(d)).toLowerCase();
-						info("Attempting match device '"+ lcdevice +"' with default '"+ lcserial +"'");
+						log.info("Attempting match device '"+ lcdevice +"' with default '"+ lcserial +"'");
 						matched = lcdevice.startsWith(lcserial);
 					}
 					// if DeviceSerial does not match one of multiple then abort
@@ -544,7 +589,7 @@ public class SoloTest{
 						DUtilities.USE_DEVICE_SERIAL = " -s "+ DUtilities.DEFAULT_DEVICE_SERIAL +" ";
 					}else{
 						String msg = "Requested Device '"+ DUtilities.DEFAULT_DEVICE_SERIAL +"' was not found.";
-						debug(msg);
+						log.debug(msg);
 						return false;							
 					}
 				}else{
@@ -557,7 +602,7 @@ public class SoloTest{
 						device = tdev.substring(0, tdev.length() -8).trim();
 					}else{
 						String msg = "Unknown Device Listing Format: "+ tdev;
-						debug(msg);
+						log.debug(msg);
 						return false;							
 					}
 					havedevice = true;
@@ -570,7 +615,7 @@ public class SoloTest{
 			}
 			
 		}catch(Exception x){
-			debug("Aborting due to "+x.getClass().getSimpleName()+", "+ x.getMessage());
+			log.debug("Aborting due to "+x.getClass().getSimpleName()+", "+ x.getMessage());
 			return false;
 		}			
 		
@@ -585,7 +630,7 @@ public class SoloTest{
 	 */
 	final protected boolean initialize(){
 		boolean success = false;
-		
+		String action = ".initialize()";
 		try {
 			solo.initialize();
 			robotiumUtils = new RobotiumUtils(solo);
@@ -599,7 +644,7 @@ public class SoloTest{
 			success = solo.startMainLauncher();
 			//Set the mainActivityUID
 			mainActivityUID = solo.getCurrentActivity();
-			debug("mainActivityUID="+mainActivityUID);
+			log.debug("mainActivityUID="+mainActivityUID);
 			
 		} catch (IllegalThreadStateException e) {
 			e.printStackTrace();
@@ -612,9 +657,9 @@ public class SoloTest{
 		}
 		
 		if(success){
-			debug("Launch application successfully.");
+			log.debug("Launch application successfully.");
 		}else{
-			error("Fail to launch application.");
+			log.fail(action, "Fail to launch application.");
 		}
 		return success; 
 	}
@@ -630,13 +675,14 @@ public class SoloTest{
 	 */
 	final protected boolean terminate(){
 		boolean success = false;
+		String action = ".terminate()";
 		
 		robotiumUtils = null;
 		robotiumTimeout = null;
 		
 		try {			
 			if(!solo.shutdownRemote()){
-				warn("Fail to shutdown remote service.");
+				log.warn(action, "Fail to shutdown remote service.");
 			}
 			//Even if we fail to shutdown remote service, we will shutdown RemoteControlRunner
 			solo.shutdown();
@@ -644,7 +690,7 @@ public class SoloTest{
 			if(removeinstalledapk) removeInstalledAPK();
 			
 			if(!stopEmulator()){
-				warn("We fail to stop the emulator launched by us.");
+				log.warn(action, "We fail to stop the emulator launched by us.");
 			}
 			success = true;
 		} catch (Exception e) {
@@ -652,28 +698,29 @@ public class SoloTest{
 		}
 		
 		if(success){
-			debug("terminate successfully.");
+			log.debug("terminate successfully.");
 		}else{
-			warn("Fail to terminate.");
+			log.warn(action, "Fail to terminate.");
 		}
 		return success;
 	}
 	
 	final void removeInstalledAPK(){
+		String action = ".removeInstalledAPK()";
 		try{
 			DUtilities.uninstallAPK(autApk, true);
 		}catch(Exception e){
-			warn(e.getMessage());
+			log.warn(action, e.getMessage());
 		}
 		try{
 			DUtilities.uninstallAPK(messengerApk, true);
 		}catch(Exception e){
-			warn(e.getMessage());
+			log.warn(action, e.getMessage());
 		}
 		try{
 			DUtilities.uninstallAPK(testRunnerApk, true);
 		}catch(Exception e){
-			warn(e.getMessage());
+			log.warn(action, e.getMessage());
 		}
 	}
 	
@@ -689,13 +736,13 @@ public class SoloTest{
 		if(weLaunchedEmulator){
 			//Then we will shutdown any emulator lauched by us.
 			if(!persistEmulators) {
-				info(" checking for launched emulators...");
+				log.info(" checking for launched emulators...");
 				stopped = DUtilities.shutdownLaunchedEmulators(weLaunchedEmulator);		  	
 			}else{
-				info(" attempting to PERSIST any launched emulators...");
+				log.info(" attempting to PERSIST any launched emulators...");
 			}
 		}else{
-			info("we didn't start any emulators.");
+			log.info("we didn't start any emulators.");
 		}
 		
 		return stopped;
@@ -719,6 +766,7 @@ public class SoloTest{
 	 */
 	protected void test(){
 		//Begin the testing
+		String action = ".test()";
 		try {
 			
 			String activityID = solo.getCurrentActivity();
@@ -726,52 +774,52 @@ public class SoloTest{
 			String activityName = props.getProperty(Message.PARAM_NAME);
 			String activityClass = props.getProperty(Message.PARAM_CLASS);
 
-			info("CurrentActivity   UID: "+ activityID);
-			info("CurrentActivity Class: "+ activityClass);				
-			info("CurrentActivity  Name: "+ activityName);
+			log.info("CurrentActivity   UID: "+ activityID);
+			log.info("CurrentActivity Class: "+ activityClass);				
+			log.info("CurrentActivity  Name: "+ activityName);
 			
 			//DEBUG: Verifying the Name we return is the same one used by waitForActivity
 			if(solo.waitForActivity(activityName, 1000)){
-				pass("'"+activityName+"' was found in timeout period.");
+				log.pass(action, "'"+activityName+"' was found in timeout period.");
 			}else{
-				warn("*** '"+activityName+"' was NOT FOUND in timeout period. ***");
+				log.warn(action, "*** '"+activityName+"' was NOT FOUND in timeout period. ***");
 			}
 			// NEGATIVE TEST
 			if(solo.waitForActivity("BoguActivity", 1000)){
-				warn("*** BogusActivity was reported as found but is not a valid Activity! ***");
+				log.warn(action, "*** BogusActivity was reported as found but is not a valid Activity! ***");
 			}else{
-				pass("BogusActivity was not found and was not expected to be found.");
+				log.pass(action, "BogusActivity was not found and was not expected to be found.");
 			}
 
 			String layoutUID = solo.getView("android.widget.LinearLayout", 0);			
-			info("Layout UID= "+layoutUID);
+			log.info("Layout UID= "+layoutUID);
 			
 			String listUID = solo.getView("android.widget.ListView", 0);
-			info("list UID= "+listUID);
+			log.info("list UID= "+listUID);
 			
 			solo.config_setScreenshotFileType(Message.FILETYPE_JPEG);
 			BufferedImage image = solo.takeScreenshot("ActivityScreenshot_JPEG");
 			if(image != null) {
-				info("Screenshot image  width:"+ image.getWidth());
-				info("Screenshot image height:"+ image.getHeight());
-				info("Screenshot stored at: "+ solo._last_remote_result.getProperty(Message.PARAM_NAME+"FILE"));
+				log.info("Screenshot image  width:"+ image.getWidth());
+				log.info("Screenshot image height:"+ image.getHeight());
+				log.info("Screenshot stored at: "+ solo._last_remote_result.getProperty(Message.PARAM_NAME+"FILE"));
 			}
-			else info("Screenshot returned as NULL!");
+			else log.info("Screenshot returned as NULL!");
 
 			solo.config_setScreenshotFileType(Message.FILETYPE_PNG);
 			image = solo.takeScreenshot("ActivityScreenshot_PNG");
 			if(image != null) {
-				info("Screenshot image  width:"+ image.getWidth());
-				info("Screenshot image height:"+ image.getHeight());
-				info("Screenshot stored at: "+ solo._last_remote_result.getProperty(Message.PARAM_NAME+"FILE"));
+				log.info("Screenshot image  width:"+ image.getWidth());
+				log.info("Screenshot image height:"+ image.getHeight());
+				log.info("Screenshot stored at: "+ solo._last_remote_result.getProperty(Message.PARAM_NAME+"FILE"));
 			}
-			else info("Screenshot returned as NULL!");
+			else log.info("Screenshot returned as NULL!");
 			
 			// SHUTDOWN all Activities.  Done Testing.
 			if(solo.finishOpenedActivities()){
-				info("Application finished/shutdown without error.");				
+				log.info("Application finished/shutdown without error.");				
 			}else{
-				warn("Application finished/shutdown with error.");
+				log.warn(action, "Application finished/shutdown with error.");
 			}
 
 		} catch (IllegalThreadStateException e) {
@@ -786,25 +834,36 @@ public class SoloTest{
 			e.printStackTrace();
 		} 
 	}
-	
-	public void debug(String message) {
-		System.out.println("SoloTest DEBUG: "+message);
-	}
-	public void info(String message) {
-		System.out.println("SoloTest INFO: "+message);
-	}
-	public void warn(String message) {
-		System.err.println("SoloTest WARN: "+message);
-	}
 
+	/** use log.debug LogsInterface directly. */
+	@Deprecated
+	public void debug(String message) {
+		log.debug(getClass().getSimpleName()+" DEBUG: "+message);
+	}
+	/** use log.info LogsInterface directly. */
+	@Deprecated
+	public void info(String message) {
+		log.info(getClass().getSimpleName()+" INFO: "+message);
+	}
+	/** use log.warn LogsInterface instead. */
+	@Deprecated
+	public void warn(String message) {
+		log.warn(getClass().getSimpleName(), "WARN: "+message);
+	}
+	/** use log.pass LogsInterface instead. */
+	@Deprecated
 	public void pass(String message) {
-		System.out.println("SoloTest PASS: "+message);		
+		log.pass(getClass().getSimpleName(), "PASS: "+message);		
 	}
+	/** use log.fail LogsInterface instead. */
+	@Deprecated
 	public void fail( String message) {
-		System.err.println("SoloTest FAIL: "+message);
+		log.fail(getClass().getSimpleName(),"FAIL: "+message);
 	}
+	/** use log.fail LogsInterface instead. */
+	@Deprecated
 	public void error( String message) {
-		System.err.println("SoloTest ERROR: "+message);
+		log.fail(getClass().getSimpleName(),"ERROR: "+message);
 	}
 	
 	/**
@@ -817,23 +876,23 @@ public class SoloTest{
 		
 		do{
 			if(solo.waitForViewUID(viewUID, 50, true)){
-				debug("Back to view "+viewUID);
+				log.debug("Back to view "+viewUID);
 				return;
 			}else{
 				//solo.getCurrentActivity() will never return null? There is always an activity.
 				String currentActivity = solo.getCurrentActivity();
-				debug("Current Activity is "+currentActivity);
+				log.debug("Current Activity is "+currentActivity);
 				if(currentActivity==null || currentActivity.equals(mainActivityUID)){
-					debug("Exit the main activity!!!");
+					log.debug("Exit the main activity!!!");
 					break;
 				}else{
-					debug("Trying go back...");
+					log.debug("Trying go back...");
 				}
 			}
 			looptime++;
 		}while((looptime<loopLimit) && solo.goBack());
 		
-		debug("Can not go back to view "+viewUID);
+		log.debug("Can not go back to view "+viewUID);
 	}
 	
 	protected void pause(int millis){
@@ -848,7 +907,7 @@ public class SoloTest{
 		//scroll to the top of the list
 		try {
 			while(solo.scrollUp()){
-				debug("Scrolling up......");
+				log.debug("Scrolling up......");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -859,7 +918,7 @@ public class SoloTest{
 		//scroll to the bottom of the list
 		try {
 			while(solo.scrollDown()){
-				debug("Scrolling down......");
+				log.debug("Scrolling down......");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -899,5 +958,4 @@ public class SoloTest{
 		
 		soloTest.process();
 	}
-
 }

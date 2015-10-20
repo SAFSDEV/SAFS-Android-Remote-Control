@@ -247,7 +247,7 @@ public class SoloTestAndroidApi extends SoloTest {
 	private static final String TYPE_TIMEPICKER		= "TP";
 	private static final String TYPE_TEXTVIEW 		= "TV";
 	
-	@SuppressWarnings({ "unused", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	private void printCurrentViews(String viewType) throws Exception{
 		List<String> views = null;
 		String methodString = null;
