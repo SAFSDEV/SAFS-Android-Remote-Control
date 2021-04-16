@@ -22,7 +22,7 @@ package com.jayway.android.robotium.remotecontrol.solo;
  * <p>
  * @author  Lei Wang
  *
- *   <br>   APR 01, 2012    (LeiWang) Original Release
+ *   <br>   APR 01, 2012    (Lei Wang) Original Release
  **/
 public class RemoteSoloException extends Exception {
 

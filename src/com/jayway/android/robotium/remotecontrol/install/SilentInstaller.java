@@ -51,15 +51,15 @@ import org.safs.text.FileUtilities;
  * single invocation if all the parameters are properly specified.  If no parameters whatsoever are 
  * specified then the app will attempt an install to the default location.
  * <p>
- * @author CarlNagle  JUN 25, 2012 Original Release<br>
- * 		   LeiWang  JUL 02, 2013 Modify to build Runner/Messenger automatically.<br>
- * 		   LeiWang  JUL 03, 2013 Add ProgressIndicator to show the progress.<br>
- *         CarlNagle  JUL 11, 2013 Add -resignjar, -originalapk, and -resignedapk options to re-sign the sample apk<br>
- *         LeiWang  JUL 25, 2013 Move some codes to org.safs.text.FileUtilities<br>
+ * @author Carl Nagle  JUN 25, 2012 Original Release<br>
+ * 		   Lei Wang  JUL 02, 2013 Modify to build Runner/Messenger automatically.<br>
+ * 		   Lei Wang  JUL 03, 2013 Add ProgressIndicator to show the progress.<br>
+ *         Carl Nagle  JUL 11, 2013 Add -resignjar, -originalapk, and -resignedapk options to re-sign the sample apk<br>
+ *         Lei Wang  JUL 25, 2013 Move some codes to org.safs.text.FileUtilities<br>
  *                              Move ProgressIndicator to package org.safs.install<br>
- *         LeiWang  NOV 01, 2013 Add "-testrunner" option to decide what is wrote to local.properties of TCPMessenger<br>
+ *         Lei Wang  NOV 01, 2013 Add "-testrunner" option to decide what is wrote to local.properties of TCPMessenger<br>
  *                              Modify method modifyPropertiesFile(): add more comments to .properties file.
- *         CarlNagle  JUL 24, 2014 RobotiumTestRunner is no longer built all the time.
+ *         Carl Nagle  JUL 24, 2014 RobotiumTestRunner is no longer built all the time.
  */
 public class SilentInstaller {
 	/** "RobotiumRCInstall.ZIP" */

@@ -36,8 +36,8 @@ import org.safs.sockets.android.DroidSocketProtocol;
  * 
  * @author Carl Nagle, SAS Institute, Inc
  * 
- * OCT 11, 2012	(LeiWang) Remove field startEmulatorPortForwarding, because we can use portForwarding instead.
- * FEB 06, 2013 (CarlNagle) Fixed performRemoteShutdown to properly use secsWaitShutdown.
+ * OCT 11, 2012	(Lei Wang) Remove field startEmulatorPortForwarding, because we can use portForwarding instead.
+ * FEB 06, 2013 (Carl Nagle) Fixed performRemoteShutdown to properly use secsWaitShutdown.
  */
 public class SoloRemoteControl implements SocketProtocolListener, DebugListener{
 		

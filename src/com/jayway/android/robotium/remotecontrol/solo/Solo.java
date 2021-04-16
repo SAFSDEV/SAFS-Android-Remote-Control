@@ -18,12 +18,12 @@
 package com.jayway.android.robotium.remotecontrol.solo;
 /**
  * History:
- * <br>May 17, 2013		(LeiWang)	Update to support Robotium 4.1
- * <br>Jun 21, 2013		(LeiWang)	Update to support Robotium 4.1+
- * <br>Jun 25, 2013		(CarlNagle)	Update to support Robotium 4.2
- * <br>SEP 04, 2013		(CarlNagle)	Update to support Solo.getViewId(int, index)
- * <br>JUL 21, 2014		(LeiWang)	Update to support Robotium 5.2.1
- * <br>Mar 06, 2015		(LeiWang)	Update to support Robotium 5.3.1
+ * <br>May 17, 2013		(Lei Wang)	Update to support Robotium 4.1
+ * <br>Jun 21, 2013		(Lei Wang)	Update to support Robotium 4.1+
+ * <br>Jun 25, 2013		(Carl Nagle)	Update to support Robotium 4.2
+ * <br>SEP 04, 2013		(Carl Nagle)	Update to support Solo.getViewId(int, index)
+ * <br>JUL 21, 2014		(Lei Wang)	Update to support Robotium 5.2.1
+ * <br>Mar 06, 2015		(Lei Wang)	Update to support Robotium 5.3.1
  */
 import java.awt.Dimension;
 import java.awt.Rectangle;

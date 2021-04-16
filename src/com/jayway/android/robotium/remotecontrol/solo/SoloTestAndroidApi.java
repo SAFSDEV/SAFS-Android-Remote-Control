@@ -38,7 +38,7 @@ import java.util.Properties;
  * This test requires you set you device's "language setting" to "English"<br>
  *    
  * @author Lei Wang, SAS Institute, Inc.
- * <br>May 17, 2013		(LeiWang)	Move some codes to SoloTest
+ * <br>May 17, 2013		(Lei Wang)	Move some codes to SoloTest
  */
 public class SoloTestAndroidApi extends SoloTest {
 	

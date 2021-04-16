@@ -26,7 +26,7 @@ import java.nio.file.NoSuchFileException;
 
 /**
  * Default FileWriter version of a Robotium RemoteControl LogsInterface
- * @author CarlNagle
+ * @author Carl Nagle
  */
 public class LogsImpl implements LogsInterface {
 

@@ -97,9 +97,9 @@ import org.safs.sockets.ShutdownInvocationException;
  * </pre>
  * @author Lei Wang, SAS Institute, Inc.
  * @since
- * <br>(LeiWang)	Mar 09, 2012	Add a field robotiumUtils.
- * <br>(LeiWang)	Jun 21, 2012	Add a field robotiumTimeout.
- * <br>(LeiWang)	AUG 16, 2013	Add option to permit remove installed apks automatically after test finish.
+ * <br>(Lei Wang)	Mar 09, 2012	Add a field robotiumUtils.
+ * <br>(Lei Wang)	Jun 21, 2012	Add a field robotiumTimeout.
+ * <br>(Lei Wang)	AUG 16, 2013	Add option to permit remove installed apks automatically after test finish.
  */
 public class SoloTest{
 	public Solo solo = null;

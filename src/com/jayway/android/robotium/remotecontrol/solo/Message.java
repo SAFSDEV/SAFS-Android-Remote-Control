@@ -28,9 +28,9 @@ import org.w3c.tools.codec.Base64Encoder;
  * 
  * @author Carl Nagle, SAS Institute, Inc.
  * @since
- * <br>May 17, 2013		(LeiWang)	Update to support Robotium 4.1
- * <br>Jun 21, 2013		(LeiWang)	Update to support Robotium 4.1+
- * <br>Jun 25, 2013		(CarlNagle)	Update to support Robotium 4.2
+ * <br>May 17, 2013		(Lei Wang)	Update to support Robotium 4.1
+ * <br>Jun 21, 2013		(Lei Wang)	Update to support Robotium 4.1+
+ * <br>Jun 25, 2013		(Carl Nagle)	Update to support Robotium 4.2
  */
 public class Message extends org.safs.sockets.Message{
 

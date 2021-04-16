@@ -21,7 +21,7 @@ import java.util.Properties;
 
 /**
  * Parses a SoloRemoteControl results Properties object into useful primitives. 
- * @author CarlNagle
+ * @author Carl Nagle
  */
 public class RemoteResults {
  

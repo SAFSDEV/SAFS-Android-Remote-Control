@@ -39,9 +39,9 @@ import org.safs.sockets.SocketProtocol;
  * @see Solo<br>
  * @author Carl Nagle, SAS Institute, Inc.
  * @since
- * <br>(LeiWang)	Mar 09, 2012	Add methods to turn on/off debug log of protocol/runner.
+ * <br>(Lei Wang)	Mar 09, 2012	Add methods to turn on/off debug log of protocol/runner.
  *                              Add method to shutdown remote service on device.
- * <br>(LeiWang)	Mar 09, 2012	Move static method parseStringArrayList() to Message class.
+ * <br>(Lei Wang)	Mar 09, 2012	Move static method parseStringArrayList() to Message class.
  */
 public class SoloWorker implements DebugListener{
 
