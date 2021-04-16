@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package com.jayway.android.robotium.remotecontrol.install;
 
 import java.io.*;
@@ -34,15 +51,15 @@ import org.safs.text.FileUtilities;
  * single invocation if all the parameters are properly specified.  If no parameters whatsoever are 
  * specified then the app will attempt an install to the default location.
  * <p>
- * @author Carl Nagle  JUN 25, 2012 Original Release<br>
- * 		   Lei Wang  JUL 02, 2013 Modify to build Runner/Messenger automatically.<br>
- * 		   Lei Wang  JUL 03, 2013 Add ProgressIndicator to show the progress.<br>
- *         Carl Nagle  JUL 11, 2013 Add -resignjar, -originalapk, and -resignedapk options to re-sign the sample apk<br>
- *         Lei Wang  JUL 25, 2013 Move some codes to org.safs.text.FileUtilities<br>
+ * @author CarlNagle  JUN 25, 2012 Original Release<br>
+ * 		   LeiWang  JUL 02, 2013 Modify to build Runner/Messenger automatically.<br>
+ * 		   LeiWang  JUL 03, 2013 Add ProgressIndicator to show the progress.<br>
+ *         CarlNagle  JUL 11, 2013 Add -resignjar, -originalapk, and -resignedapk options to re-sign the sample apk<br>
+ *         LeiWang  JUL 25, 2013 Move some codes to org.safs.text.FileUtilities<br>
  *                              Move ProgressIndicator to package org.safs.install<br>
- *         Lei Wang  NOV 01, 2013 Add "-testrunner" option to decide what is wrote to local.properties of TCPMessenger<br>
+ *         LeiWang  NOV 01, 2013 Add "-testrunner" option to decide what is wrote to local.properties of TCPMessenger<br>
  *                              Modify method modifyPropertiesFile(): add more comments to .properties file.
- *         Carl Nagle  JUL 24, 2014 RobotiumTestRunner is no longer built all the time.
+ *         CarlNagle  JUL 24, 2014 RobotiumTestRunner is no longer built all the time.
  */
 public class SilentInstaller {
 	/** "RobotiumRCInstall.ZIP" */
