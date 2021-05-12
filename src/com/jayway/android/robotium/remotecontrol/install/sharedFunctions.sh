@@ -5,7 +5,7 @@
 #other script. See Uninstall-Mac.sh,Uninstall-Unx.sh,
 #Setup-Mac.sh and Setup-Unx.sh.
 
-#27 AUG, 2010  LeiWang
+#27 AUG, 2010  Lei Wang
 #17 AUG, 2011  DharmeshPatel Added Mac/iOS support.
 #25 JUN, 2012  Carl Nagle
 

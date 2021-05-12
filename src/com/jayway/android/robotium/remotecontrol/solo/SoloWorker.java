@@ -1,7 +1,20 @@
-/** 
- ** Copyright (C) SAS Institute, All rights reserved.
- ** General Public License: http://www.opensource.org/licenses/gpl-license.php
- **/
+/**
+ * Copyright (C) SAS Institute, All rights reserved.
+ * General Public License: https://www.gnu.org/licenses/gpl-3.0.en.html
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package com.jayway.android.robotium.remotecontrol.solo;
 
 import java.io.PrintStream;
@@ -26,9 +39,9 @@ import org.safs.sockets.SocketProtocol;
  * @see Solo<br>
  * @author Carl Nagle, SAS Institute, Inc.
  * @since
- * <br>(LeiWang)	Mar 09, 2012	Add methods to turn on/off debug log of protocol/runner.
+ * <br>(Lei Wang)	Mar 09, 2012	Add methods to turn on/off debug log of protocol/runner.
  *                              Add method to shutdown remote service on device.
- * <br>(LeiWang)	Mar 09, 2012	Move static method parseStringArrayList() to Message class.
+ * <br>(Lei Wang)	Mar 09, 2012	Move static method parseStringArrayList() to Message class.
  */
 public class SoloWorker implements DebugListener{
 
